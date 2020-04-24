@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="start">
+
+	<!-- 입력 -->
+	<insert id="insert">
+		insert into insa(sabun, profile, name, eng_name, id, pwd, phone, hp, reg_no, years, email, job_type, sex,
+						 zip, addr1, addr2, join_gbn_code, dept_code, salary, join_yn, gart_level,
+						 put_yn, mil_yn, mil_type, mil_level, mil_startdate, mil_enddate, kosa_reg_yn,
+						 kosa_class_code, join_day, retire_day, cmp_reg_no, crm_name, cmp_reg_image, carrier, self_info)
+
+		values(seq_insa.nextval, #{profile}, #{name}, #{eng_name}, #{id}, #{pwd}, #{phone}, #{hp}, #{reg_no}, #{years},
+			 #{email}, #{job_type}, #{sex}, #{zip}, #{addr1}, #{addr2}, #{join_gbn_code}, #{dept_code},
+			 #{salary}, #{join_yn}, #{gart_level}, #{put_yn}, #{mil_yn}, #{mil_type}, #{mil_level}, 
+			 #{mil_startdate}, #{mil_enddate}, #{kosa_reg_yn}, #{kosa_class_code}, #{join_day}, #{retire_day}, 
+			 #{cmp_reg_no}, #{crm_name}, #{cmp_reg_image}, #{carrier}, #{self_info})
+	</insert>
+
+	<!-- 사번 -->
+	<select id="getSabun" resultType="int">
+		select count(*) from insa
+	</select>
+
+	<!-- 전체조회 -->
+	<select id="selectList" resultType="StartVo">
+		select *
+		from insa
+		where 1=1
+		<if test="sabun != null and sabun != ''">
+		 	and sabun like '%' || #{sabun} || '%'
+		</if>
+		<if test="name != null and name != ''">
+		 	 and name like '%' || #{name} || '%'
+		</if>	
+		<if test="join_yn != null and join_yn != ''">
+   		  	  and join_yn like '%' || #{join_yn} || '%'
+		</if> 
+		<if test="put_yn != null and put_yn != ''">
+   		  	  and put_yn like '%' || #{put_yn} || '%'
+		</if>
+		<if test="join_gbn_code != null and join_gbn_code != ''">
+   		  	  and join_gbn_code like '%' || #{join_gbn_code} || '%'
+		</if>
+		<if test="join_day != null and join_day != ''">
+   		  	  and join_day like '%' || #{join_day} || '%'
+		</if>
+		<if test="retire_day != null and retire_day != ''">
+   		  	  and retire_day like '%' || #{retire_day} || '%'
+		</if>
+		<if test="job_type != null and job_type != ''">
+   		  	  and job_type like '%' || #{job_type} || '%'
+		</if> 
+		order by sabun desc 
+		<!-- 오름차순내림차순.desc asc -->
+	</select>
+
+	<!-- 조회 -->
+	<select id="select" resultType="StartVo">
+		select *
+		from insa
+		where sabun = #{sabun}
+	</select>
+
+	<!-- 수정 -->
+	<update id="update">
+		update insa set
+			profile = #{profile},
+			name = #{name}, 
+			eng_name = #{eng_name},
+			id = #{id},
+			pwd = #{pwd},
+			phone = #{phone},
+			hp = #{hp}, 
+			reg_no = #{reg_no},
+			years = #{years},
+			email = #{email},
+			job_type = #{job_type},
+			sex = #{sex},
+			zip = #{zip},
+			addr1 = #{addr1},
+			addr2 = #{addr2},
+			join_gbn_code = #{join_gbn_code},
+			dept_code = #{dept_code},
+			salary = #{salary},
+			join_yn = #{join_yn},
+			gart_level = #{gart_level},
+			put_yn = #{put_yn},
+			mil_yn = #{mil_yn},
+			mil_type = #{mil_type},
+			mil_level = #{mil_level},
+			mil_startdate = #{mil_startdate},
+			mil_enddate = #{mil_enddate},
+			kosa_reg_yn = #{kosa_reg_yn},
+			kosa_class_code = #{kosa_class_code},
+			join_day = #{join_day},
+			retire_day = #{retire_day},
+			cmp_reg_no = #{cmp_reg_no},
+			crm_name = #{crm_name},
+			cmp_reg_image = #{cmp_reg_image},
+			carrier = #{carrier},
+			self_info = #{self_info}
+		where sabun = #{sabun}
+	</update>
+
+	<!-- 삭제 -->
+	<delete id="sabunDelete">
+		delete from insa
+		where sabun = #{sabun}
+	</delete>
+
+	<!-- 게시글목록 -->
+	<select id="boardList" resultType="BoardVo">
+		select 
+    		bno, title, content, writer, regdate, viewcnt, dept_code, area, gender, kosa, mil_yn, tot_cnt
+		from
+		    (
+		    select bno, title, content, writer, regdate, viewcnt, dept_code, area, gender, kosa, mil_yn, count(*) over() as tot_cnt
+		    from process_board
+			<!-- where 1=1 -->
+		    <trim prefixOverrides="and" prefix="where">
+			<if test="!(writer == null) || ! (writer =='')">
+				and writer like '%' || #{writer} || '%'
+			</if>
+			<if test="!(dept_code == null) || ! (dept_code == '')">
+				and dept_code like '%' || #{dept_code} || '%'
+			</if>
+			<if test="!(area == null) || ! (area == '')">
+				and area like '%' || #{area} || '%' 
+			</if>
+			<if test="gender != null || gender != ''">
+				and gender like '%' || #{gender} || '%'
+			</if>
+			<if test="kosa != null || kosa != ''">
+				and kosa like '%' || #{kosa} || '%'
+			</if>
+			<if test="mil_yn != null || mil_yn != ''">
+				and mil_yn like '%' || #{mil_yn} || '%'
+			</if>
+			</trim>
+		    )
+	</select>
+
+	<!-- 게시글조회 -->
+	<select id="read" resultType="BoardVo">
+		select * from
+		process_board
+		where bno = #{bno}	
+		order by bno desc
+		<!-- 오름차순내림차순.desc asc -->
+	</select>
+
+	<!-- 조회수증가 -->
+	<update id="viewcnt">
+		update process_board set
+			viewcnt = viewcnt + 1
+		where bno = #{bno}
+	</update>
+
+	<!-- 게시글쓰기 -->
+	<insert id="write">
+		insert into process_board(bno, title, content, writer, regdate, viewcnt, dept_code, area, 
+									gender, kosa, mil_yn, hobby, marry, file_up, file_up1)
+		values(seq_board.nextval, #{title}, #{content}, #{writer}, to_char(sysdate, 'yyyy-mm-dd'), #{viewcnt}, #{dept_code},
+				 #{area}, #{gender}, #{kosa}, #{mil_yn}, #{hobby}, #{marry}, #{file_up}, #{file_up1})
+	</insert>
+
+	<!-- 게시글삭제 -->
+	<delete id="bnoDelete">
+		delete from process_board
+		where bno = #{bno}
+	</delete>
+
+	<!-- 게시글수정 -->
+	<update id="regist">
+		update process_board set
+			title = #{title},
+			content = #{content},
+			writer = #{writer},
+			regdate = #{regdate},
+			viewcnt = #{viewcnt},
+			dept_code = #{dept_code},
+			area = #{area},
+			gender = #{gender},
+			kosa = #{kosa},
+			mil_yn = #{mil_yn},
+			hobby = #{hobby},
+			marry = #{marry},
+			file_up = #{file_up},
+			file_up1 = #{file_up1}
+		where bno = #{bno}	
+	</update>
+
+	<!--  전달사항 글쓰기 -->
+	<insert id="made">
+		insert into notice(nn, tt, cc, ww, dd, aa, gg, hh, mm, ff, ff1)
+		values(seq_notice.nextval, #{tt}, #{cc}, #{ww}, #{dd}, #{aa}, #{gg}, #{hh}, #{mm}, #{ff}, #{ff1})
+	</insert>
+
+	<!--  전달사항 글목록 -->
+	<select id="noticeList" resultType="NoticeVo">
+		select * 
+		from notice 
+	</select>
+
+	<!--  전달사항 글조회 -->
+	<select id="view" resultType="NoticeVo" >
+		select *
+		from notice
+		where nn = #{nn}
+		order by nn desc
+		<!-- 오름차순내림차순.desc asc -->
+	</select>
+
+	<!--  전달사항 글수정 -->
+	<update id="advice">
+		update notice set 
+			tt = #{tt},
+			cc = #{cc},
+			ww = #{ww},
+			dd = #{dd},
+			aa = #{aa},
+			gg = #{gg},
+			hh = #{hh},
+			mm = #{mm},
+			ff = #{ff},
+			ff1 = #{ff1}
+		where nn = #{nn}
+	</update>	
+
+	<!--  전달사항 글삭제 -->
+	<delete id="nnDelete">
+		delete from notice
+		where nn = #{nn}
+	</delete>
+</mapper>	
+
